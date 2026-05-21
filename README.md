@@ -35,7 +35,7 @@
 
 ```
 ╔══════════════════════════════════════════════════════════╗
-║           AI Coding Agent  v0.2.0 — Powered by Claude    ║
+║           AI Coding Agent  v0.1.0                        ║
 ╚══════════════════════════════════════════════════════════╝
 
 > agent "analiza el proyecto y corrige los errores de compilación"
