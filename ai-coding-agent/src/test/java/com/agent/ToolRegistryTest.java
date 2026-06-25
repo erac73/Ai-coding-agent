@@ -10,6 +10,7 @@ import com.agent.tools.filesystem.GrepTool;
 import com.agent.tools.filesystem.ListDirTool;
 import com.agent.tools.filesystem.ReadFileTool;
 import com.agent.tools.filesystem.WriteFileTool;
+import com.agent.tools.git.GitTool;
 import com.agent.tools.terminal.RunCommandTool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,17 +38,19 @@ class ToolRegistryTest {
             .register(new EditFileTool())
             .register(new ListDirTool())
             .register(new GrepTool())
+            .register(new GitTool())
             .register(new RunCommandTool(validator));
     }
 
     @Test
     void shouldRegisterAndRetrieveTools() {
-        assertThat(registry.size()).isEqualTo(6);
+        assertThat(registry.size()).isEqualTo(7);
         assertThat(registry.hasTool("read_file")).isTrue();
         assertThat(registry.hasTool("write_file")).isTrue();
         assertThat(registry.hasTool("edit_file")).isTrue();
         assertThat(registry.hasTool("list_dir")).isTrue();
         assertThat(registry.hasTool("grep")).isTrue();
+        assertThat(registry.hasTool("git")).isTrue();
         assertThat(registry.hasTool("run_command")).isTrue();
     }
 

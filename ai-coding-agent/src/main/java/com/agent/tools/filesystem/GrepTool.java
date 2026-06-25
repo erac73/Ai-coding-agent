@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class GrepTool implements AgentTool {
@@ -90,23 +90,18 @@ public class GrepTool implements AgentTool {
 
     private void searchInFile(Path file, Pattern regex, StringBuilder out, int[] count) {
         try (Stream<String> lines = Files.lines(file)) {
-            var matches = lines.limit(5000)
-                .map(line -> Map.entry(line, regex.matcher(line)))
-                .filter(entry -> entry.getValue().find())
-                .collect(Collectors.toList());
-
-            if (!matches.isEmpty()) {
-                out.append("\n").append(file).append(":\n");
-                for (var entry : matches) {
-                    if (count[0] >= MAX_RESULTS) {
-                        out.append("  ... more matches truncated\n");
-                        return;
-                    }
+            List<String> lineList = lines.limit(5000).toList();
+            IntStream.range(0, lineList.size())
+                .filter(i -> regex.matcher(lineList.get(i)).find())
+                .forEach(i -> {
+                    if (count[0] >= MAX_RESULTS) return;
+                    if (count[0] == 0) out.append("\n").append(file).append(":\n");
                     count[0]++;
-                    out.append("  L").append(entry.getValue().toString())
-                       .append(": ").append(entry.getKey().trim()).append("\n");
-                }
-            }
+                    out.append("  L").append(i + 1).append(": ").append(lineList.get(i).trim()).append("\n");
+                    if (count[0] == MAX_RESULTS) {
+                        out.append("  ... more matches truncated\n");
+                    }
+                });
         } catch (IOException e) {
             // skip unreadable files
         }

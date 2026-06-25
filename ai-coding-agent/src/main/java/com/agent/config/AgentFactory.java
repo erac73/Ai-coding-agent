@@ -12,6 +12,7 @@ import com.agent.tools.filesystem.GrepTool;
 import com.agent.tools.filesystem.ListDirTool;
 import com.agent.tools.filesystem.ReadFileTool;
 import com.agent.tools.filesystem.WriteFileTool;
+import com.agent.tools.git.GitTool;
 import com.agent.tools.terminal.RunCommandTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,7 @@ public class AgentFactory {
             .register(new EditFileTool())
             .register(new ListDirTool())
             .register(new GrepTool())
+            .register(new GitTool())
             .register(new RunCommandTool(validator));
 
         log.info("Registered {} tools: {}", registry.size(), registry.getToolNames());

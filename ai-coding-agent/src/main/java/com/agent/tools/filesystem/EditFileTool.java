@@ -18,6 +18,8 @@ public class EditFileTool implements AgentTool {
     public String getDescription() {
         return "Performs a targeted text replacement in an existing file. " +
                "Finds 'oldString' in the file and replaces it with 'newString'. " +
+               "By default replaces only the first occurrence. Set 'replaceAll' to 'true' " +
+               "to replace every occurrence. " +
                "Use this instead of write_file when you need to make small, " +
                "targeted changes to an existing file.";
     }
@@ -26,8 +28,9 @@ public class EditFileTool implements AgentTool {
     public Map<String, String> getParameterDescriptions() {
         return Map.of(
             "path", "Relative or absolute path to the file to edit",
-            "oldString", "The exact text to find and replace (must be unique in the file)",
-            "newString", "The replacement text"
+            "oldString", "The exact text to find and replace",
+            "newString", "The replacement text",
+            "replaceAll", "(Optional) Set to 'true' to replace all occurrences. Default: 'false'"
         );
     }
 
@@ -36,6 +39,7 @@ public class EditFileTool implements AgentTool {
         String pathStr = params.get("path");
         String oldString = params.get("oldString");
         String newString = params.get("newString");
+        boolean replaceAll = Boolean.parseBoolean(params.getOrDefault("replaceAll", "false"));
 
         if (pathStr == null || pathStr.isBlank()) {
             return ToolResult.fail(getName(), "Parameter 'path' is required");
@@ -58,27 +62,50 @@ public class EditFileTool implements AgentTool {
 
         try {
             String content = Files.readString(resolved);
-            if (!content.contains(oldString)) {
-                return ToolResult.fail(getName(),
-                    "oldString not found in file: " + resolved);
+
+            if (!replaceAll) {
+                if (!content.contains(oldString)) {
+                    return ToolResult.fail(getName(),
+                        "oldString not found in file: " + resolved);
+                }
+                int idx = content.indexOf(oldString);
+                String newContent = content.substring(0, idx) + newString + content.substring(idx + oldString.length());
+                if (content.equals(newContent)) {
+                    return ToolResult.fail(getName(), "Replacement produced no changes");
+                }
+                Files.writeString(resolved, newContent);
+                return ToolResult.ok(getName(),
+                    "Edited 1 occurrence in: %s".formatted(resolved),
+                    Map.of("path", resolved.toString(), "occurrences", 1));
+            } else {
+                if (!content.contains(oldString)) {
+                    return ToolResult.fail(getName(),
+                        "oldString not found in file: " + resolved);
+                }
+                String newContent = content.replace(oldString, newString);
+                if (content.equals(newContent)) {
+                    return ToolResult.fail(getName(), "Replacement produced no changes");
+                }
+                int occurrences = countOccurrences(content, oldString);
+                Files.writeString(resolved, newContent);
+                return ToolResult.ok(getName(),
+                    "Edited %d occurrence(s) in: %s".formatted(occurrences, resolved),
+                    Map.of("path", resolved.toString(), "occurrences", occurrences));
             }
-
-            String newContent = content.replace(oldString, newString);
-
-            if (content.equals(newContent)) {
-                return ToolResult.fail(getName(), "Replacement produced no changes");
-            }
-
-            Files.writeString(resolved, newContent);
-
-            long linesChanged = newContent.lines().count();
-            return ToolResult.ok(getName(),
-                "File edited successfully: %s".formatted(resolved),
-                Map.of("path", resolved.toString(), "lines", linesChanged));
 
         } catch (IOException e) {
             return ToolResult.fail(getName(), "Cannot edit file: " + e.getMessage());
         }
+    }
+
+    private int countOccurrences(String text, String search) {
+        int count = 0;
+        int idx = 0;
+        while ((idx = text.indexOf(search, idx)) != -1) {
+            count++;
+            idx += search.length();
+        }
+        return count;
     }
 
     private Path resolve(String pathStr, Path workingDir) {

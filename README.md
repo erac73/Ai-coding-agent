@@ -142,7 +142,9 @@ agent "crea una clase User con nombre y email"
 |------|--------|-------------|
 | `read_file` | — | Lee el contenido completo de un archivo (hasta 50k caracteres) |
 | `write_file` | — | Crea o sobreescribe un archivo; crea carpetas padre automáticamente |
+| `edit_file` | — | Reemplazo quirúrgico de texto (`oldString` → `newString`), soporta `replaceAll` |
 | `list_dir` | — | Árbol del proyecto hasta 3 niveles, ignora `build/`, `node_modules/`, `.git/` |
+| `grep` | — | Busca patrones regex en archivos, con filtro por extensión y exclusión de carpetas |
 | `run_command` | — | Ejecuta comandos en terminal con sandbox de seguridad y timeout de 30s |
 | `git` | `status` | Estado del working tree y staging area |
 | `git` | `log` | Historial de commits con autor, fecha y mensaje |
@@ -181,10 +183,12 @@ agent "crea una clase User con nombre y email"
 │             │  │                │  │                │
 │ • Anthropic │  │ • ReadFile     │  │ • Historial    │
 │ • OpenAI    │  │ • WriteFile    │  │ • Compresión   │
-│ • Ollama    │  │ • ListDir      │  │   automática   │
-│             │  │ • RunCommand   │  └────────────────┘
-│ fallback    │  │ • GitTool      │
-│ automático  │  │ • ASTAnalyzer  │
+│ • Ollama    │  │ • EditFile     │  │   automática   │
+│             │  │ • ListDir      │  └────────────────┘
+│ fallback    │  │ • Grep         │
+│ automático  │  │ • RunCommand   │
+│             │  │ • GitTool (JGit)│
+│             │  │ • ASTAnalyzer  │
 └─────────────┘  └────────────────┘
 ```
 
@@ -343,7 +347,7 @@ ai-coding-agent/
 │   │   ├── tools/
 │   │   │   ├── AgentTool.java      ← Interfaz base
 │   │   │   ├── ToolRegistry.java   ← Registro central
-│   │   │   ├── filesystem/         ← ReadFile, WriteFile, ListDir
+│   │   │   ├── filesystem/         ← ReadFile, WriteFile, EditFile, ListDir, Grep
 │   │   │   ├── terminal/           ← RunCommand, OSAbstraction
 │   │   │   ├── git/                ← GitTool (JGit)
 │   │   │   └── analysis/           ← ASTAnalyzerTool (JavaParser)
@@ -356,7 +360,11 @@ ai-coding-agent/
 │   │   ├── model/                  ← AgentContext, ToolResult
 │   │   └── config/                 ← AgentConfig, AgentFactory
 │   └── test/java/com/agent/
-│       └── ToolRegistryTest.java
+│       ├── ToolRegistryTest.java
+│       ├── tools/filesystem/      ← EditFileToolTest, GrepToolTest
+│       ├── security/              ← CommandValidatorTest
+│       ├── memory/                ← ShortTermMemoryTest
+│       └── model/                 ← ToolResultTest
 ├── build.gradle
 ├── settings.gradle
 └── README.md
