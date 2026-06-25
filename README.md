@@ -83,7 +83,10 @@
 | **Análisis AST** | Analiza código Java con JavaParser: clases, métodos, dependencias y complejidad ciclomática |
 | **Sandbox de seguridad** | `CommandValidator` bloquea comandos destructivos antes de ejecutarlos |
 | **Multiplataforma** | Windows (PowerShell), Linux y macOS (bash/zsh) via `OSAbstraction` |
-| **Model routing** | Soporta Anthropic + OpenAI con fallback automático entre proveedores |
+| **Model routing** | Soporta Anthropic + OpenAI + Ollama con fallback automático |
+| **REPL con JLine3** | Historial de comandos, autocompletado con Tab, colores ANSI |
+| **Docker** | Dockerfile multi-stage para ejecutar sin instalar Java |
+| **CI/CD** | GitHub Actions corre tests y build en cada push |
 | **Extensible** | Añadir una tool nueva = implementar una interfaz + una línea de registro |
 
 ---
@@ -145,9 +148,14 @@ agent "crea una clase User con nombre y email"
 |------|--------|-------------|
 | `read_file` | — | Lee el contenido completo de un archivo (hasta 50k caracteres) |
 | `write_file` | — | Crea o sobreescribe un archivo; crea carpetas padre automáticamente |
+| `read_file` | — | Lee el contenido completo de un archivo (hasta 50k caracteres) |
+| `write_file` | — | Crea o sobreescribe un archivo; crea carpetas padre automáticamente |
 | `edit_file` | — | Reemplazo quirúrgico de texto (`oldString` → `newString`), soporta `replaceAll` |
+| `delete_file` | — | Elimina un archivo o directorio vacío |
+| `move_file` | — | Mueve, renombra o copia archivos y directorios |
 | `list_dir` | — | Árbol del proyecto hasta 3 niveles, ignora `build/`, `node_modules/`, `.git/` |
 | `grep` | — | Busca patrones regex en archivos, con filtro por extensión y exclusión de carpetas |
+| `fetch_url` | — | Obtiene contenido de URLs (documentación, APIs) con timeout de 30s |
 | `run_command` | — | Ejecuta comandos en terminal con sandbox de seguridad y timeout de 30s |
 | `git` | `status` | Estado del working tree y staging area |
 | `git` | `log` | Historial de commits con autor, fecha y mensaje |
@@ -300,14 +308,19 @@ Los logs de auditoría se guardan en `~/.agent/logs/agent.log`.
 - [x] CLI con Picocli — modo tarea directa + modo REPL interactivo
 - [x] ReAct loop completo (Reason → Act → Observe)
 - [x] Tool system extensible (`AgentTool` + `ToolRegistry`)
-- [x] Filesystem tools (`read_file`, `write_file`, `edit_file`, `list_dir`, `grep`)
+- [x] Filesystem tools (`read_file`, `write_file`, `edit_file`, `delete_file`, `move_file`, `list_dir`, `grep`)
 - [x] Terminal tool con sandbox de seguridad
 - [x] Memoria de corto plazo con compresión automática
-- [x] Integración Anthropic API (Claude) + OpenAI API (GPT-4o)
+- [x] Integración Anthropic (Claude) + OpenAI (GPT-4o) + Ollama (local)
 - [x] OS Abstraction (Windows / Linux / macOS / WSL)
 - [x] Git nativo via JGit (status, log, diff, add, commit, branch, checkout)
+- [x] Análisis AST (JavaParser) — analizar, resumir, buscar, métricas
+- [x] Network tool (`fetch_url`) — leer documentación online
+- [x] REPL con JLine3 — historial, autocompletado Tab, colores ANSI
 - [x] Logging estructurado con Logback (consola + rolling file)
-- [x] Tests unitarios (JUnit 5 + Mockito + AssertJ) — 6 suites, 27+ tests
+- [x] CI/CD con GitHub Actions (test + build automáticos)
+- [x] Docker multi-stage para despliegue sin JVM
+- [x] Tests unitarios (JUnit 5 + Mockito + AssertJ) — 12 suites, 40+ tests
 
 ---
 
@@ -353,9 +366,10 @@ ai-coding-agent/
 │   │   ├── tools/
 │   │   │   ├── AgentTool.java      ← Interfaz base
 │   │   │   ├── ToolRegistry.java   ← Registro central
-│   │   │   ├── filesystem/         ← ReadFile, WriteFile, EditFile, ListDir, Grep
+│   │   │   ├── filesystem/         ← ReadFile, WriteFile, EditFile, DeleteFile, MoveFile, ListDir, Grep
 │   │   │   ├── terminal/           ← RunCommand, OSAbstraction
 │   │   │   ├── git/                ← GitTool (JGit)
+│   │   │   ├── network/            ← FetchUrlTool (HTTP)
 │   │   │   └── analysis/           ← ASTAnalyzerTool (JavaParser)
 │   │   ├── ai/
 │   │   │   ├── ModelRouter.java    ← Enrutamiento entre LLMs
@@ -367,7 +381,11 @@ ai-coding-agent/
 │   │   └── config/                 ← AgentConfig, AgentFactory
 │   └── test/java/com/agent/
 │       ├── ToolRegistryTest.java
-│       ├── tools/filesystem/      ← EditFileToolTest, GrepToolTest
+│       ├── ai/                    ← MockModelProvider
+│       ├── orchestrator/          ← AgentOrchestratorTest
+│       ├── tools/filesystem/      ← EditFileToolTest, GrepToolTest, DeleteFileToolTest, MoveFileToolTest
+│       ├── tools/git/             ← GitToolTest
+│       ├── tools/network/         ← FetchUrlToolTest
 │       ├── security/              ← CommandValidatorTest
 │       ├── memory/                ← ShortTermMemoryTest
 │       └── model/                 ← ToolResultTest

@@ -5,12 +5,16 @@ import com.agent.model.ToolResult;
 import com.agent.security.CommandValidator;
 import com.agent.tools.AgentTool;
 import com.agent.tools.ToolRegistry;
+import com.agent.tools.analysis.ASTAnalyzerTool;
+import com.agent.tools.filesystem.DeleteFileTool;
 import com.agent.tools.filesystem.EditFileTool;
 import com.agent.tools.filesystem.GrepTool;
 import com.agent.tools.filesystem.ListDirTool;
+import com.agent.tools.filesystem.MoveFileTool;
 import com.agent.tools.filesystem.ReadFileTool;
 import com.agent.tools.filesystem.WriteFileTool;
 import com.agent.tools.git.GitTool;
+import com.agent.tools.network.FetchUrlTool;
 import com.agent.tools.terminal.RunCommandTool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,21 +40,29 @@ class ToolRegistryTest {
             .register(new ReadFileTool())
             .register(new WriteFileTool())
             .register(new EditFileTool())
+            .register(new DeleteFileTool())
+            .register(new MoveFileTool())
             .register(new ListDirTool())
             .register(new GrepTool())
             .register(new GitTool())
+            .register(new ASTAnalyzerTool())
+            .register(new FetchUrlTool())
             .register(new RunCommandTool(validator));
     }
 
     @Test
     void shouldRegisterAndRetrieveTools() {
-        assertThat(registry.size()).isEqualTo(7);
+        assertThat(registry.size()).isEqualTo(11);
         assertThat(registry.hasTool("read_file")).isTrue();
         assertThat(registry.hasTool("write_file")).isTrue();
         assertThat(registry.hasTool("edit_file")).isTrue();
+        assertThat(registry.hasTool("delete_file")).isTrue();
+        assertThat(registry.hasTool("move_file")).isTrue();
         assertThat(registry.hasTool("list_dir")).isTrue();
         assertThat(registry.hasTool("grep")).isTrue();
         assertThat(registry.hasTool("git")).isTrue();
+        assertThat(registry.hasTool("analyze_code")).isTrue();
+        assertThat(registry.hasTool("fetch_url")).isTrue();
         assertThat(registry.hasTool("run_command")).isTrue();
     }
 
