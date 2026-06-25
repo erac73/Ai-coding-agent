@@ -10,7 +10,13 @@ Agente de IA autónomo para coding, construido en Java. Similar a Claude Code u 
 
 ### 2. Compilar
 
+El proyecto incluye Gradle Wrapper — no necesitas instalar Gradle:
+
 ```bash
+# En PowerShell:
+.\gradlew shadowJar
+
+# En bash/zsh:
 ./gradlew shadowJar
 ```
 
@@ -53,23 +59,28 @@ AgentCommand (CLI)
             ├── ToolRegistry
             │       ├── ReadFileTool
             │       ├── WriteFileTool
-            │       ├── EditFileTool
+            │       ├── EditFileTool     ← reemplazo quirúrgico
             │       ├── ListDirTool
-            │       ├── GrepTool
+            │       ├── GrepTool         ← búsqueda regex
+            │       ├── GitTool          ← JGit (status/log/commit/etc)
             │       └── RunCommandTool
             ├── PromptManager
-            └── ShortTermMemory
+            ├── ShortTermMemory
+            └── Tests: 6 suites, 27+ tests
 ```
 
 ## Tools disponibles
 
 | Tool | Descripción |
 |------|-------------|
+| Tool | Descripción |
+|------|-------------|
 | `read_file` | Lee el contenido completo de un archivo |
 | `write_file` | Crea o sobreescribe un archivo con contenido |
-| `edit_file` | Reemplazo quirúrgico de texto en un archivo existente |
+| `edit_file` | Reemplazo quirúrgico: busca `oldString` y lo cambia por `newString`. Soporta `replaceAll=true` |
 | `list_dir` | Lista la estructura de un directorio (hasta 3 niveles) |
-| `grep` | Busca patrones regex en el contenido de archivos |
+| `grep` | Busca patrones regex en archivos, con filtro por extensión |
+| `git` | Operaciones Git: status, log, diff, add, commit, branch, checkout |
 | `run_command` | Ejecuta comandos en terminal con sandbox de seguridad |
 
 ## Añadir una nueva tool
@@ -106,11 +117,12 @@ registry.register(new MyCustomTool());
 - [x] Tool system extensible
 - [x] ReAct loop (Reason → Act → Observe)
 - [x] Filesystem tools (read, write, edit, list, grep)
+- [x] GitTool via JGit (status, log, diff, add, commit, branch, checkout)
 - [x] Terminal tool con sandbox de seguridad
 - [x] Memoria de corto plazo
 - [x] Multi-provider (Anthropic + OpenAI)
 - [x] Logging estructurado (Logback)
-- [ ] GitTool (JGit)
+- [x] Tests unitarios — 6 suites, 27+ tests
 - [ ] ASTAnalyzerTool (JavaParser)
 - [ ] RAG + memoria largo plazo (Qdrant)
 - [ ] Modo interactivo mejorado (JLine3)

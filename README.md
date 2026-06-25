@@ -83,7 +83,7 @@
 | **Análisis AST** | Analiza código Java con JavaParser: clases, métodos, dependencias y complejidad ciclomática |
 | **Sandbox de seguridad** | `CommandValidator` bloquea comandos destructivos antes de ejecutarlos |
 | **Multiplataforma** | Windows (PowerShell), Linux y macOS (bash/zsh) via `OSAbstraction` |
-| **Model routing** | Soporta Anthropic Claude con fallback automático entre proveedores |
+| **Model routing** | Soporta Anthropic + OpenAI con fallback automático entre proveedores |
 | **Extensible** | Añadir una tool nueva = implementar una interfaz + una línea de registro |
 
 ---
@@ -93,16 +93,19 @@
 ### Requisitos
 
 - **Java 21+**
-- **Gradle 8+** (o usa el wrapper `./gradlew` incluido)
-- **API Key** de Anthropic, OpenAI u Ollama (local)
+- **API Key** de Anthropic u OpenAI
+
+> El proyecto incluye Gradle Wrapper — no necesitas instalar Gradle. `gradlew.bat` descarga la versión correcta automáticamente.
 
 ### 1 — Clonar y compilar
 
 ```bash
-git clone https://github.com/tu-usuario/ai-coding-agent.git
-cd ai-coding-agent
+git clone https://github.com/erac73/Ai-coding-agent.git
+cd Ai-coding-agent/ai-coding-agent
 ./gradlew shadowJar
 ```
+
+> En Windows PowerShell usa `.\gradlew shadowJar`
 
 Genera `build/libs/agent.jar` — fat JAR con todas las dependencias incluidas.
 
@@ -297,11 +300,14 @@ Los logs de auditoría se guardan en `~/.agent/logs/agent.log`.
 - [x] CLI con Picocli — modo tarea directa + modo REPL interactivo
 - [x] ReAct loop completo (Reason → Act → Observe)
 - [x] Tool system extensible (`AgentTool` + `ToolRegistry`)
-- [x] Filesystem tools (`read_file`, `write_file`, `list_dir`)
+- [x] Filesystem tools (`read_file`, `write_file`, `edit_file`, `list_dir`, `grep`)
 - [x] Terminal tool con sandbox de seguridad
 - [x] Memoria de corto plazo con compresión automática
-- [x] Integración Anthropic API (Claude)
+- [x] Integración Anthropic API (Claude) + OpenAI API (GPT-4o)
 - [x] OS Abstraction (Windows / Linux / macOS / WSL)
+- [x] Git nativo via JGit (status, log, diff, add, commit, branch, checkout)
+- [x] Logging estructurado con Logback (consola + rolling file)
+- [x] Tests unitarios (JUnit 5 + Mockito + AssertJ) — 6 suites, 27+ tests
 
 ---
 
