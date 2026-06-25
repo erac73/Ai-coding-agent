@@ -2,11 +2,15 @@ package com.agent;
 
 import com.agent.model.AgentContext;
 import com.agent.model.ToolResult;
+import com.agent.security.CommandValidator;
 import com.agent.tools.AgentTool;
 import com.agent.tools.ToolRegistry;
+import com.agent.tools.filesystem.EditFileTool;
+import com.agent.tools.filesystem.GrepTool;
+import com.agent.tools.filesystem.ListDirTool;
 import com.agent.tools.filesystem.ReadFileTool;
 import com.agent.tools.filesystem.WriteFileTool;
-import com.agent.tools.filesystem.ListDirTool;
+import com.agent.tools.terminal.RunCommandTool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -26,18 +30,25 @@ class ToolRegistryTest {
     @BeforeEach
     void setup() {
         context = new AgentContext(tempDir);
+        CommandValidator validator = new CommandValidator(false);
         registry = new ToolRegistry()
             .register(new ReadFileTool())
             .register(new WriteFileTool())
-            .register(new ListDirTool());
+            .register(new EditFileTool())
+            .register(new ListDirTool())
+            .register(new GrepTool())
+            .register(new RunCommandTool(validator));
     }
 
     @Test
     void shouldRegisterAndRetrieveTools() {
-        assertThat(registry.size()).isEqualTo(3);
+        assertThat(registry.size()).isEqualTo(6);
         assertThat(registry.hasTool("read_file")).isTrue();
         assertThat(registry.hasTool("write_file")).isTrue();
+        assertThat(registry.hasTool("edit_file")).isTrue();
         assertThat(registry.hasTool("list_dir")).isTrue();
+        assertThat(registry.hasTool("grep")).isTrue();
+        assertThat(registry.hasTool("run_command")).isTrue();
     }
 
     @Test

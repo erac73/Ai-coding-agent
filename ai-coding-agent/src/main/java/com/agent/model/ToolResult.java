@@ -26,9 +26,14 @@ public record ToolResult(
         return new ToolResult(toolName, false, null, error, Map.of());
     }
 
+    private static final int MAX_PROMPT_CHARS = 2_000;
+
     public String toPromptString() {
         if (success) {
-            return "Tool '%s' executed successfully:\n%s".formatted(toolName, output);
+            String truncated = output != null && output.length() > MAX_PROMPT_CHARS
+                ? output.substring(0, MAX_PROMPT_CHARS) + "\n[...TRUNCATED]"
+                : output;
+            return "Tool '%s' executed successfully:\n%s".formatted(toolName, truncated);
         } else {
             return "Tool '%s' FAILED:\n%s".formatted(toolName, error);
         }

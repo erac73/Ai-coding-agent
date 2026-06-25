@@ -3,9 +3,12 @@ package com.agent.config;
 import com.agent.ai.ModelRouter;
 import com.agent.ai.PromptManager;
 import com.agent.ai.providers.AnthropicProvider;
+import com.agent.ai.providers.OpenAiProvider;
 import com.agent.orchestrator.AgentOrchestrator;
 import com.agent.security.CommandValidator;
 import com.agent.tools.ToolRegistry;
+import com.agent.tools.filesystem.EditFileTool;
+import com.agent.tools.filesystem.GrepTool;
 import com.agent.tools.filesystem.ListDirTool;
 import com.agent.tools.filesystem.ReadFileTool;
 import com.agent.tools.filesystem.WriteFileTool;
@@ -36,7 +39,9 @@ public class AgentFactory {
         ToolRegistry registry = new ToolRegistry()
             .register(new ReadFileTool())
             .register(new WriteFileTool())
+            .register(new EditFileTool())
             .register(new ListDirTool())
+            .register(new GrepTool())
             .register(new RunCommandTool(validator));
 
         log.info("Registered {} tools: {}", registry.size(), registry.getToolNames());
@@ -52,11 +57,20 @@ public class AgentFactory {
             () -> log.warn("ANTHROPIC_API_KEY not set — Anthropic provider disabled")
         );
 
+        config.getOpenAiApiKey().ifPresentOrElse(
+            key -> {
+                router.addProvider(new OpenAiProvider(key));
+                log.info("OpenAI provider configured");
+            },
+            () -> log.debug("OPENAI_API_KEY not set — OpenAI provider disabled")
+        );
+
         if (!router.hasAvailableProvider()) {
             throw new IllegalStateException(
                 "\n No AI provider configured!\n" +
                 "   Set your API key:\n" +
                 "   export ANTHROPIC_API_KEY=sk-ant-...\n" +
+                "   export OPENAI_API_KEY=sk-...\n" +
                 "   Or create ~/.agent/config.json with 'agent --init'");
         }
 

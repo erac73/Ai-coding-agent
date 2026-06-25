@@ -49,11 +49,13 @@ agent "crea una clase User con nombre y email"
 ```
 AgentCommand (CLI)
     └── AgentOrchestrator (ReAct loop)
-            ├── ModelRouter (Anthropic / OpenAI / Ollama)
+            ├── ModelRouter (Anthropic / OpenAI)
             ├── ToolRegistry
             │       ├── ReadFileTool
             │       ├── WriteFileTool
+            │       ├── EditFileTool
             │       ├── ListDirTool
+            │       ├── GrepTool
             │       └── RunCommandTool
             ├── PromptManager
             └── ShortTermMemory
@@ -63,10 +65,12 @@ AgentCommand (CLI)
 
 | Tool | Descripción |
 |------|-------------|
-| `read_file` | Lee el contenido de un archivo |
-| `write_file` | Crea o sobreescribe un archivo |
-| `list_dir` | Lista la estructura de un directorio |
-| `run_command` | Ejecuta comandos en terminal |
+| `read_file` | Lee el contenido completo de un archivo |
+| `write_file` | Crea o sobreescribe un archivo con contenido |
+| `edit_file` | Reemplazo quirúrgico de texto en un archivo existente |
+| `list_dir` | Lista la estructura de un directorio (hasta 3 niveles) |
+| `grep` | Busca patrones regex en el contenido de archivos |
+| `run_command` | Ejecuta comandos en terminal con sandbox de seguridad |
 
 ## Añadir una nueva tool
 
@@ -101,13 +105,17 @@ registry.register(new MyCustomTool());
 - [x] CLI básico (Picocli)
 - [x] Tool system extensible
 - [x] ReAct loop (Reason → Act → Observe)
-- [x] Filesystem tools
+- [x] Filesystem tools (read, write, edit, list, grep)
 - [x] Terminal tool con sandbox de seguridad
 - [x] Memoria de corto plazo
+- [x] Multi-provider (Anthropic + OpenAI)
+- [x] Logging estructurado (Logback)
 - [ ] GitTool (JGit)
 - [ ] ASTAnalyzerTool (JavaParser)
 - [ ] RAG + memoria largo plazo (Qdrant)
 - [ ] Modo interactivo mejorado (JLine3)
+- [ ] Agente de terminal (modo REPL con historial)
+- [ ] Ollama provider para modelos locales
 - [ ] Spring Boot API REST
 - [ ] Multi-agent orchestration
 

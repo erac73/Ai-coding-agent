@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+
+# Compiled classes from IDE manual compiles
+bin/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# JARs
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Logs
+*.log
+~/.agent/logs/
